@@ -35,6 +35,15 @@ describe('getGameScore', () => {
     expect(gameScore.scoreCall).to.equal('15-love', 'Implement player scored logic');
   });
 
+  it('Advantage, player1 (after Advantage, 40)', () => {
+    const gamePoints = { player1: 4, player2: 3 };
+
+    const { scoreCall, winningPlayer } = getGameScore(gamePoints);
+
+    expect(scoreCall).to.equal('Advantage, player1', 'Implement player advantage logic after AD-40');
+    expect(winningPlayer).to.equal('player1', 'Implement player advantage logic after AD-40');
+  });
+
   it('Game, player1 (after 40-0)', () => {
     const gamePoints = { player1: 4, player2: 0 };
 
