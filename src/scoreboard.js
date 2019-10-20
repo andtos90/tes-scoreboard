@@ -1,9 +1,9 @@
 const POINT_TO_SCORE = {
-  "0": "love",
-  "1": "15",
-  "2": "30",
-  "3": "40",
-}
+  '0': 'love',
+  '1': '15',
+  '2': '30',
+  '3': '40',
+};
 
 /*
  * Game ends when one of the player reach 4 or 5 points:
@@ -34,32 +34,49 @@ export const initialState = {
     player1: 0,
     player2: 0,
   },
+  gameState: 'REGULAR',
 };
 
 export function setScore(playerNumber, previousState) {
   const gamePoints = Object.assign({}, previousState.gamePoints);
+  let gameState = previousState.gameState;
 
-  if (isGameEnded(gamePoints)) {
+  if (gameState === 'WINNING') {
     // nothing to do here
     return previousState;
-  } else if (!hasPlayerAdvantage(gamePoints)) {
-    // no player had the advantage
-    gamePoints[`player${playerNumber}`] = previousState.gamePoints[`player${playerNumber}`] + 1
-  } else {
-    // game was not finished and one player had the advantage 
-    const playerWithAdvantage = gamePoints.player1 > gamePoints.player2 ? 1 : 2;
-
-    if (playerWithAdvantage !== playerNumber) {
-      // draw: remove the other player advantage
-      gamePoints[`player${playerWithAdvantage}`] = previousState.gamePoints[`player${playerWithAdvantage}`] - 1
+  } else if (gameState === 'DEUCE') {
+    if (gamePoints.player1 === gamePoints.player2) {
+      gamePoints[`player${playerNumber}`] =
+        previousState.gamePoints[`player${playerNumber}`] + 1;
     } else {
-      // win: increment the player score
-      gamePoints[`player${playerNumber}`] = previousState.gamePoints[`player${playerNumber}`] + 1
+      const playerWithAdvantage =
+        gamePoints.player1 > gamePoints.player2 ? 1 : 2;
+
+      if (playerWithAdvantage !== playerNumber) {
+        // draw: remove the other player advantage
+        gamePoints[`player${playerWithAdvantage}`] =
+          previousState.gamePoints[`player${playerWithAdvantage}`] - 1;
+      } else {
+        // win: increment the player score
+        gamePoints[`player${playerNumber}`] =
+          previousState.gamePoints[`player${playerNumber}`] + 1;
+        gameState = 'WINNING';
+      }
+    }
+  } else {
+    // REGULAR STATE
+    gamePoints[`player${playerNumber}`] =
+      previousState.gamePoints[`player${playerNumber}`] + 1;
+    if (gamePoints[`player${playerNumber}`] === 4) {
+      gameState = 'WINNING';
+    } else if (gamePoints.player1 === 3 && gamePoints.player2 === 3) {
+      gameState = 'DEUCE';
     }
   }
 
   return {
-    gamePoints
+    gamePoints,
+    gameState,
   };
 }
 
@@ -67,28 +84,34 @@ export function getGameScore(gamePoints) {
   const result = {
     scoreCall: null,
     winningPlayer: null,
-  }
+  };
 
   // winning player
   if (gamePoints.player1 === gamePoints.player2) {
     result.winningPlayer = null;
   } else {
-    result.winningPlayer = gamePoints.player1 > gamePoints.player2 ? `player1` : `player2`;
+    result.winningPlayer =
+      gamePoints.player1 > gamePoints.player2 ? `player1` : `player2`;
   }
 
   // score call
   if (isGameEnded(gamePoints)) {
-    result.scoreCall = `Game, ${result.winningPlayer}`
+    result.scoreCall = `Game, ${result.winningPlayer}`;
   } else if (hasPlayerAdvantage(gamePoints)) {
-    result.scoreCall = `Advantage, ${result.winningPlayer}`
+    result.scoreCall = `Advantage, ${result.winningPlayer}`;
   } else if (gamePoints.player1 === gamePoints.player2) {
     // draw
-    const scorePrefix = gamePoints.player1 === 0 ? `love` : POINT_TO_SCORE[`${gamePoints.player1}`]
-    result.scoreCall = `${scorePrefix}-all`
+    const scorePrefix =
+      gamePoints.player1 === 0
+        ? `love`
+        : POINT_TO_SCORE[`${gamePoints.player1}`];
+    result.scoreCall = `${scorePrefix}-all`;
   } else {
     // one of the player is winning without the advantage
-    result.scoreCall = `${POINT_TO_SCORE[`${gamePoints.player1}`]}-${POINT_TO_SCORE[`${gamePoints.player2}`]}`
+    result.scoreCall = `${POINT_TO_SCORE[`${gamePoints.player1}`]}-${
+      POINT_TO_SCORE[`${gamePoints.player2}`]
+    }`;
   }
 
-  return result
+  return result;
 }

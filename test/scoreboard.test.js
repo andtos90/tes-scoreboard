@@ -14,8 +14,9 @@ describe('initialState', () => {
     it('each player starts with 0 points', () => {
       expect(initialState.gamePoints.player1).to.equal(0);
       expect(initialState.gamePoints.player2).to.equal(0);
-    })
-  })
+      expect(initialState.gameState).to.equal('REGULAR');
+    });
+  });
 });
 
 describe('getGameScore', () => {
@@ -32,7 +33,10 @@ describe('getGameScore', () => {
 
     const gameScore = getGameScore(gamePoints);
 
-    expect(gameScore.scoreCall).to.equal('15-love', 'Implement player scored logic');
+    expect(gameScore.scoreCall).to.equal(
+      '15-love',
+      'Implement player scored logic',
+    );
   });
 
   it('Advantage, player1 (after Advantage, 40)', () => {
@@ -40,8 +44,14 @@ describe('getGameScore', () => {
 
     const { scoreCall, winningPlayer } = getGameScore(gamePoints);
 
-    expect(scoreCall).to.equal('Advantage, player1', 'Implement player advantage logic after AD-40');
-    expect(winningPlayer).to.equal('player1', 'Implement player advantage logic after AD-40');
+    expect(scoreCall).to.equal(
+      'Advantage, player1',
+      'Implement player advantage logic after AD-40',
+    );
+    expect(winningPlayer).to.equal(
+      'player1',
+      'Implement player advantage logic after AD-40',
+    );
   });
 
   it('Game, player1 (after 40-0)', () => {
@@ -49,8 +59,14 @@ describe('getGameScore', () => {
 
     const { scoreCall, winningPlayer } = getGameScore(gamePoints);
 
-    expect(scoreCall).to.equal('Game, player1', 'Implement player win logic after 40-0');
-    expect(winningPlayer).to.equal('player1', 'Implement player win logic after 40-0');
+    expect(scoreCall).to.equal(
+      'Game, player1',
+      'Implement player win logic after 40-0',
+    );
+    expect(winningPlayer).to.equal(
+      'player1',
+      'Implement player win logic after 40-0',
+    );
   });
 });
 
@@ -62,6 +78,7 @@ describe('setScore', () => {
 
     expect(state.gamePoints.player1).to.equal(1);
     expect(state.gamePoints.player2).to.equal(0);
+    expect(initialState.gameState).to.equal('REGULAR');
   });
 
   it('Player 1 wins game', () => {
@@ -74,6 +91,7 @@ describe('setScore', () => {
 
     expect(state.gamePoints.player1).to.equal(4);
     expect(state.gamePoints.player2).to.equal(0);
+    expect(state.gameState).to.equal('WINNING');
   });
 
   it('Players deuce', () => {
@@ -88,6 +106,7 @@ describe('setScore', () => {
 
     expect(state.gamePoints.player1).to.equal(3);
     expect(state.gamePoints.player2).to.equal(3);
+    expect(state.gameState).to.equal('DEUCE');
   });
 
   it('Player 1 advantage', () => {
@@ -103,6 +122,7 @@ describe('setScore', () => {
 
     expect(state.gamePoints.player1).to.equal(4);
     expect(state.gamePoints.player2).to.equal(3);
+    expect(state.gameState).to.equal('DEUCE');
   });
 
   it('Players double deuce', () => {
@@ -119,6 +139,24 @@ describe('setScore', () => {
 
     expect(state.gamePoints.player1).to.equal(3, 'Implement deuce logic');
     expect(state.gamePoints.player2).to.equal(3, 'Implement deuce logic');
+    expect(state.gameState).to.equal('DEUCE');
+  });
+
+  it('Player 1 win after advantage', () => {
+    let state = initialState;
+
+    state = setScore(1, state); // 15 - 0
+    state = setScore(1, state); // 30 - 0
+    state = setScore(1, state); // 40 - 0
+    state = setScore(2, state); // 40 - 15
+    state = setScore(2, state); // 40 - 30
+    state = setScore(2, state); // 40 - 40 (Deuce)
+    state = setScore(1, state); // AD - 40
+    state = setScore(1, state); // Game
+
+    expect(state.gamePoints.player1).to.equal(5);
+    expect(state.gamePoints.player2).to.equal(3);
+    expect(state.gameState).to.equal('WINNING');
   });
 });
 
@@ -134,6 +172,9 @@ describe('<Scoreboard />', () => {
 
     wrapper.find('button.player1-scores').simulate('click');
 
-    expect(wrapper.find('h2#score').text()).to.equal('Score: 15-love', 'Implement game scoring UI interaction');
+    expect(wrapper.find('h2#score').text()).to.equal(
+      'Score: 15-love',
+      'Implement game scoring UI interaction',
+    );
   });
 });
